@@ -13,14 +13,17 @@ import java.util.List;
 
 public class Renderer {
     private ShaderUtil shader;
+    private TextureLoader textureLoader;
 
-    public Renderer(ShaderUtil shader) {
+    public Renderer(ShaderUtil shader, TextureLoader textureLoader) {
         this.shader = shader;
+        this.textureLoader = textureLoader;
     }
 
     public void prepare() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
         shader.use();
+        textureLoader.bind();
     }
 
     public void submit(Mesh mesh, Matrix4f modelMatrix, Matrix4f viewMatrix, Matrix4f projectionMatrix) {
@@ -28,9 +31,7 @@ public class Renderer {
             FloatBuffer buffer = stack.mallocFloat(16);
 
             GL20.glUniformMatrix4fv(shader.getModelLocation(), false, modelMatrix.get(buffer));
-
             GL20.glUniformMatrix4fv(shader.getViewLocation(), false, viewMatrix.get(buffer));
-
             GL20.glUniformMatrix4fv(shader.getProjectionLocation(), false, projectionMatrix.get(buffer));
 
             mesh.draw();
@@ -45,5 +46,6 @@ public class Renderer {
 
     public void cleanup() {
         shader.delete();
+        textureLoader.cleanup();
     }
 }

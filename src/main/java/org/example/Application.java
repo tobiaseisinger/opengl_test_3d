@@ -2,6 +2,8 @@ package org.example;
 
 import org.example.Shader.ShaderUtil;
 import org.example.blocks.Block;
+import org.example.blocks.BlockType;
+import org.example.blocks.GrassBlock;
 import org.example.mesh.MeshData;
 import org.example.utils.Utils;
 import org.joml.Matrix4f;
@@ -31,18 +33,32 @@ public class Application {
     private void init() {
         window = new Window("Test 3D", 800, 600);
         shader = new ShaderUtil("src/main/java/org/example/Shader/vertex_shader.glsl", "src/main/java/org/example/Shader/fragment_shader.glsl");
+        TextureLoader textureLoader = new TextureLoader("src/main/resources/atlas.png", 16);
 
         camera = new Camera(new Vector3f(0, 0, 5), new Vector3f(0, 0, -1), new Vector3f(0, 1, 0), -90, 0, 2.5f);
         camera.setCursorPosCallback(window.getWindowHandle());
 
-        renderer = new Renderer(shader);
+        renderer = new Renderer(shader, textureLoader);
 
         blocks = new ArrayList<>();
-        blocks.add(new MeshData(new Block(1, new Vector3f(-1, 0, 0)).getMesh(), new Block(1, new Vector3f(-1, 0, 0)).getModelMatrix()));
-        blocks.add(new MeshData(new Block(1, new Vector3f(1, 0, 0)).getMesh(), new Block(1, new Vector3f(1, 0, 0)).getModelMatrix()));
-        blocks.add(new MeshData(new Block(1, new Vector3f(0, 1, 0)).getMesh(), new Block(1, new Vector3f(0, 1, 0)).getModelMatrix()));
+
+        textureLoader.registerTexture("grass_top", 0, 0);
+        textureLoader.registerTexture("dirt", 2, 0);
+        textureLoader.registerTexture("grass_side", 3, 0);
+
+        for (BlockType type : BlockType.values()) {
+            type.setTextureCoords(textureLoader);
+        }
+
+        addBlocks(textureLoader);
+
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
+    }
+
+    private void addBlocks(TextureLoader textureLoader) {
+        GrassBlock grassBlock = new GrassBlock(1.0f, new Vector3f(0, 0, 0), textureLoader);
+        blocks.add(new MeshData(grassBlock.getMesh(), grassBlock.getModelMatrix()));
     }
 
     private void loop() {
